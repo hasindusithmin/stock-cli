@@ -253,6 +253,41 @@ def holders(market:str = typer.Argument(...,help="[italic blue]Enter required ma
     t2.start()
     t1.join()
 
+@app.command(help="[bold yellow]Show institutional holders.[/bold yellow]")
+def institutional_holders(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        ticker = yf.Ticker(market.upper())
+        # Declare and Initialize `df:DataFrame`
+        df = ticker.institutional_holders
+        if df.empty:
+            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `header:List`
+            header = df.columns.values.tolist()
+            # Create `console` instance 
+            console = Console()
+            # Create a table instance 
+            table = Table(str(header[0]),str(header[1]),str(header[2]),str(header[3]),str(header[4]))
+            # Loop `df` DateFrame
+            for index, row in df.iterrows():
+                table.add_row(str(row[header[0]]),str(row[header[1]]),str(row[header[2]]),str(row[header[3]]),str(row[header[4]]),end_section=True)
+            # Print Rich's table
+            console.print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
 
 if __name__ == "__main__":
     app()
