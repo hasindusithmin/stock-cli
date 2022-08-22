@@ -102,6 +102,34 @@ def chart(market:str = typer.Argument(...,help="[italic blue]Enter required mark
     t2.start()
     t1.join()
 
+@app.command(help="[bold yellow]Show actions (dividends, splits).[/bold yellow]")
+def actions(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        ticker = yf.Ticker(market.upper())
+        df = ticker.actions.reset_index()
+        if df.empty:
+            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            console = Console()
+            table = Table("Date", "Dividends","Stock Splits")
+            for index, row in df.iterrows():
+                table.add_row(str(row['Date']),str(row['Dividends']),str(row['Stock Splits']),end_section=True)
+            console.print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(0.5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
 
 
 if __name__ == "__main__":
