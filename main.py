@@ -6,6 +6,8 @@ import rich
 from rich.progress import Progress,SpinnerColumn, TextColumn
 from rich.console import Console
 from rich.table import Table
+from rich.columns import Columns
+from rich.panel import Panel
 import threading
 import yfinance as yf
 import mplfinance as mpf
@@ -514,6 +516,38 @@ def calendar(market:str = typer.Argument(...,help="[italic blue]Enter required m
         ) as progress:
             progress.add_task(description="Processing...", total=None)
             time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
+@app.command(help="[bold yellow]Show news.[/bold yellow]")
+def news(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        ticker = yf.Ticker(market.upper())
+        # Declare and Initialize `df:DataFrame`
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Create `console` instance 
+            console = Console()
+            # Create `news` Dict 
+            news = ticker.news
+            def get_news_panel(n):
+                return f"[bold green3]{n['publisher']}[/bold green3] {n['type']}\n[bold light_cyan1]{n['title']}.[/bold light_cyan1]\n[light_cyan1]Visit for more details[/light_cyan1] [italic blue]{n['link']}[/italic blue]\n[bold]{datetime.utcfromtimestamp(n['providerPublishTime']).strftime('%Y-%m-%d')}[/bold]"
+            news = [Panel(get_news_panel(n), expand=True) for n in news]
+            console.print(Columns(news))
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(0.5)
     t1 = threading.Thread(target=main, args=())
     t2 = threading.Thread(target=spinner, args=())
     t1.start()
