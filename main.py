@@ -62,7 +62,7 @@ def info(market:str = typer.Argument(...,help="[italic blue]Enter required marke
                 table.add_row(k,str(v),end_section=True)
             console.print(table)
         else:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
     def spinner():
         with Progress(
             SpinnerColumn(),
@@ -89,7 +89,7 @@ def chart(market:str = typer.Argument(...,help="[italic blue]Enter required mark
             ticker = yf.Ticker(market.upper())
             hist = ticker.history(interval=interval)
             if hist.empty:
-                rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+                rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
                 typer.Exit()
             else:
                 del hist['Dividends']
@@ -115,7 +115,7 @@ def actions(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         ticker = yf.Ticker(market.upper())
         df = ticker.actions.reset_index()
         if df.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             console = Console()
@@ -143,7 +143,7 @@ def splits(market:str = typer.Argument(...,help="[italic blue]Enter required mar
         ticker = yf.Ticker(market.upper())
         df = ticker.splits.reset_index()
         if df.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             console = Console()
@@ -171,7 +171,7 @@ def finance(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         ticker = yf.Ticker(market.upper())
         df = ticker.history()
         if df.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Create a dataframe (we can't use this `df` DataFrame because of column names are change)
@@ -229,7 +229,7 @@ def holders(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         # Declare and Initialize `df:DataFrame`
         df = ticker.major_holders
         if df.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `header:List`
@@ -264,7 +264,7 @@ def institutional_holders(market:str = typer.Argument(...,help="[italic blue]Ent
         # Declare and Initialize `df:DataFrame`
         df = ticker.institutional_holders
         if df.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `header:List`
@@ -299,7 +299,7 @@ def balance_sheet(market:str = typer.Argument(...,help="[italic blue]Enter requi
         ticker = yf.Ticker(market.upper())
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame According to the condition
@@ -338,7 +338,7 @@ def cashflow(market:str = typer.Argument(...,help="[italic blue]Enter required m
         ticker = yf.Ticker(market.upper())
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame According to the condition
@@ -377,7 +377,7 @@ def earning(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         ticker = yf.Ticker(market.upper())
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame According to the condition
@@ -416,7 +416,7 @@ def sustainability(market:str = typer.Argument(...,help="[italic blue]Enter requ
         ticker = yf.Ticker(market.upper())
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame
@@ -455,7 +455,7 @@ def recommendations(market:str = typer.Argument(...,help="[italic blue]Enter req
         # Declare and Initialize `df:DataFrame`
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame
@@ -492,7 +492,7 @@ def calendar(market:str = typer.Argument(...,help="[italic blue]Enter required m
         # Declare and Initialize `df:DataFrame`
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `df` DataFrame
@@ -529,7 +529,7 @@ def news(market:str = typer.Argument(...,help="[italic blue]Enter required marke
         # Declare and Initialize `df:DataFrame`
         hist = ticker.history()
         if hist.empty:
-            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market or data not found:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Create `console` instance 
