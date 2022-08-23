@@ -483,6 +483,43 @@ def recommendations(market:str = typer.Argument(...,help="[italic blue]Enter req
     t2.start()
     t1.join()
 
+@app.command(help="[bold yellow]Show next event (earnings, etc).[/bold yellow]")
+def calendar(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        ticker = yf.Ticker(market.upper())
+        # Declare and Initialize `df:DataFrame`
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame
+            df = ticker.calendar.reset_index()
+            # Declare and Initialize `header:List`
+            header = df.columns.values.tolist()
+            # Create `console` instance 
+            console = Console()
+            # Create a table instance 
+            table = Table(str(header[0]),str(header[1]),str(header[2]))
+            # Loop `df` DateFrame
+            for index, row in df.iterrows():
+                table.add_row(str(row[header[0]]),str(row[header[1]]),str(row[header[2]]),end_section=True)
+            # rich.print Rich's table
+            console.print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
 
 if __name__ == "__main__":
     app()
