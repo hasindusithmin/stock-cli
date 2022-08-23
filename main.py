@@ -368,6 +368,45 @@ def cashflow(market:str = typer.Argument(...,help="[italic blue]Enter required m
     t2.start()
     t1.join()
 
+@app.command(help="[bold yellow]Show earnings.[/bold yellow]")
+def earning(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly cashflow")):
+    def main():
+        # Declare and Initialize `ticker` instance 
+        ticker = yf.Ticker(market.upper())
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame According to the condition
+            df = ticker.quarterly_earnings.reset_index() if quater else ticker.earnings.reset_index()
+            # Declare and Initialize `headers` and `rows` Lists
+            headers, rows = df.columns.values.tolist(), []
+            # Declare and Initialize `table` instance
+            table = ColorTable(theme=Themes.OCEAN)
+            # Set table header 
+            table.field_names = headers
+            # Set borders 
+            table.hrules = ALL
+            # Set table rows 
+            for index,row in df.iterrows():
+                table.add_row([row[headers[i]] for i in range(len(row))])
+            # Print table 
+            print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
 
 if __name__ == "__main__":
     app()
