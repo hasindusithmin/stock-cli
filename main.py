@@ -20,8 +20,8 @@ app = typer.Typer(rich_markup_mode="rich",help="[italic]It's an open-source tool
 
 views = ['trending-tickers','most-active','gainers','losers']
 
-@app.command(help="[bold yellow]Fetches the market.[/bold yellow]")
-def fetch(view:str = typer.Argument(...,help="[italic blue]'trending-tickers','most-active','gainers','losers'[/italic blue]")):
+@app.command(help="[bold yellow]Show the markets.[/bold yellow]")
+def markets(view:str = typer.Argument(...,help="[italic blue]'trending-tickers','most-active','gainers','losers'[/italic blue]")):
     if view not in views:
         rich.print(f"[red]Error: unrecognized arguments [bold]'{view}'[/bold]. The view should be [blue]'trending-tickers', 'most-active','gainers','losers'[/blue].[/red]")
         typer.Exit()
@@ -393,6 +393,82 @@ def earning(market:str = typer.Argument(...,help="[italic blue]Enter required ma
                 table.add_row([row[headers[i]] for i in range(len(row))])
             # Print table 
             print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
+@app.command(help="[bold yellow]Show sustainability.[/bold yellow]")
+def sustainability(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        # Declare and Initialize `ticker` instance 
+        ticker = yf.Ticker(market.upper())
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame
+            df = ticker.sustainability.reset_index()
+            # Declare and Initialize `headers` and `rows` Lists
+            headers, rows = df.columns.values.tolist(), []
+            # Declare and Initialize `table` instance
+            table = ColorTable(theme=Themes.OCEAN)
+            # Set table header 
+            table.field_names = headers
+            # Set borders 
+            table.hrules = ALL
+            # Set table rows 
+            for index,row in df.iterrows():
+                table.add_row([row[headers[i]] for i in range(len(row))])
+            # Print table 
+            print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
+@app.command(help="[bold yellow]Show analysts recommendations.[/bold yellow]")
+def recommendations(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]")):
+    def main():
+        ticker = yf.Ticker(market.upper())
+        # Declare and Initialize `df:DataFrame`
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame
+            df = ticker.recommendations.reset_index()
+            # Declare and Initialize `header:List`
+            header = df.columns.values.tolist()
+            # Create `console` instance 
+            console = Console()
+            # Create a table instance 
+            table = Table(str(header[0]),str(header[1]),str(header[2]),str(header[3]),str(header[4]))
+            # Loop `df` DateFrame
+            for index, row in df.iterrows():
+                table.add_row(str(row[header[0]]),str(row[header[1]]),str(row[header[2]]),str(row[header[3]]),str(row[header[4]]),end_section=True)
+            # rich.print Rich's table
+            console.print(table)
     def spinner():
         with Progress(
             SpinnerColumn(),
