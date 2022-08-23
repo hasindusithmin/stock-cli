@@ -2,7 +2,7 @@ import typer
 import random
 import httpx
 import time
-from rich import print
+import rich
 from rich.progress import Progress,SpinnerColumn, TextColumn
 from rich.console import Console
 from rich.table import Table
@@ -12,6 +12,8 @@ import mplfinance as mpf
 import json
 from datetime import datetime
 import pandas as pd
+from prettytable.colortable import ColorTable,Themes
+from prettytable import ALL
 ###################################
 
 app = typer.Typer(rich_markup_mode="rich",help="[italic]It's an open-source tool that uses [green]Yahoo's[/green] publicly available APIs,and is intended for [red]research[/red] and [red]educational[/red] purposes.[/italic]")
@@ -21,7 +23,7 @@ views = ['trending-tickers','most-active','gainers','losers']
 @app.command(help="[bold yellow]Fetches the market.[/bold yellow]")
 def fetch(view:str = typer.Argument(...,help="[italic blue]'trending-tickers','most-active','gainers','losers'[/italic blue]")):
     if view not in views:
-        print(f"[red]Error: unrecognized arguments [bold]'{view}'[/bold]. The view should be [blue]'trending-tickers', 'most-active','gainers','losers'[/blue].[/red]")
+        rich.print(f"[red]Error: unrecognized arguments [bold]'{view}'[/bold]. The view should be [blue]'trending-tickers', 'most-active','gainers','losers'[/blue].[/red]")
         typer.Exit()
     else:
         def main():
@@ -30,7 +32,7 @@ def fetch(view:str = typer.Argument(...,help="[italic blue]'trending-tickers','m
             for dt in data:
                 for k,v in dt.items():
                     x = ' ' * (10 - len(k) + 2)
-                    print(f'[bold blue]{k}[/bold blue]{x}[yellow]{v}[/yellow]')
+                    rich.print(f'[bold blue]{k}[/bold blue]{x}[yellow]{v}[/yellow]')
         def spinner():
             with Progress(
                 SpinnerColumn(),
@@ -58,7 +60,7 @@ def info(market:str = typer.Argument(...,help="[italic blue]Enter required marke
                 table.add_row(k,str(v),end_section=True)
             console.print(table)
         else:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
     def spinner():
         with Progress(
             SpinnerColumn(),
@@ -79,13 +81,13 @@ def chart(market:str = typer.Argument(...,help="[italic blue]Enter required mark
         intervals = ['5m','15m','30m','1h','1d']
         valid_interval = True if interval in intervals else False
         if not valid_interval:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized interval:[bold]'{interval}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized interval:[bold]'{interval}'[/bold][/yellow]")
             typer.Exit()
         else:
             ticker = yf.Ticker(market.upper())
             hist = ticker.history(interval=interval)
             if hist.empty:
-                print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+                rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
                 typer.Exit()
             else:
                 del hist['Dividends']
@@ -111,7 +113,7 @@ def actions(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         ticker = yf.Ticker(market.upper())
         df = ticker.actions.reset_index()
         if df.empty:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             console = Console()
@@ -139,7 +141,7 @@ def splits(market:str = typer.Argument(...,help="[italic blue]Enter required mar
         ticker = yf.Ticker(market.upper())
         df = ticker.splits.reset_index()
         if df.empty:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             console = Console()
@@ -165,9 +167,9 @@ def splits(market:str = typer.Argument(...,help="[italic blue]Enter required mar
 def finance(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly_financials")):
     def main():
         ticker = yf.Ticker(market.upper())
-        df = ticker.splits.reset_index()
+        df = ticker.history()
         if df.empty:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Create a dataframe (we can't use this `df` DataFrame because of column names are change)
@@ -202,7 +204,7 @@ def finance(market:str = typer.Argument(...,help="[italic blue]Enter required ma
             # Loop `df` DateFrame
             for index, row in df.iterrows():
                 table.add_row(str(row[headers[0]]),str(row[headers[1]]),str(row[headers[2]]),str(row[headers[3]]),str(row[headers[4]]),end_section=True)
-            # Print Rich's table
+            # rich.print Rich's table
             console.print(table)
     def spinner():
         with Progress(
@@ -225,7 +227,7 @@ def holders(market:str = typer.Argument(...,help="[italic blue]Enter required ma
         # Declare and Initialize `df:DataFrame`
         df = ticker.major_holders
         if df.empty:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `header:List`
@@ -237,7 +239,7 @@ def holders(market:str = typer.Argument(...,help="[italic blue]Enter required ma
             # Loop `df` DateFrame
             for index, row in df.iterrows():
                 table.add_row(str(row[header[0]]),str(row[header[1]]),end_section=True)
-            # Print Rich's table
+            # rich.print Rich's table
             console.print(table)
     def spinner():
         with Progress(
@@ -260,7 +262,7 @@ def institutional_holders(market:str = typer.Argument(...,help="[italic blue]Ent
         # Declare and Initialize `df:DataFrame`
         df = ticker.institutional_holders
         if df.empty:
-            print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
             typer.Exit()
         else:
             # Declare and Initialize `header:List`
@@ -272,8 +274,47 @@ def institutional_holders(market:str = typer.Argument(...,help="[italic blue]Ent
             # Loop `df` DateFrame
             for index, row in df.iterrows():
                 table.add_row(str(row[header[0]]),str(row[header[1]]),str(row[header[2]]),str(row[header[3]]),str(row[header[4]]),end_section=True)
-            # Print Rich's table
+            # rich.print Rich's table
             console.print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
+@app.command(help="[bold yellow]Show balance sheet.[/bold yellow]")
+def balance_sheet(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly_balance_sheet")):
+    def main():
+        # Declare and Initialize `ticker` instance 
+        ticker = yf.Ticker(market.upper())
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame According to the condition
+            df = ticker.quarterly_balance_sheet.reset_index() if quater else ticker.balance_sheet.reset_index()
+            # Declare and Initialize `headers` and `rows` Lists
+            headers, rows = df.columns.values.tolist(), []
+            # Declare and Initialize `table` instance
+            table = ColorTable(theme=Themes.OCEAN)
+            # Set table header 
+            table.field_names = headers
+            # Set borders 
+            table.hrules = ALL
+            # Set table rows 
+            for index,row in df.iterrows():
+                table.add_row([row[headers[i]] for i in range(len(row))])
+            # Print table 
+            print(table)
     def spinner():
         with Progress(
             SpinnerColumn(),
