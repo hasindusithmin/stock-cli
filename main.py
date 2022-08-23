@@ -164,7 +164,7 @@ def splits(market:str = typer.Argument(...,help="[italic blue]Enter required mar
     t1.join()
 
 @app.command(help="[bold yellow]Show financials.[/bold yellow]")
-def finance(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly_financials")):
+def finance(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly financials")):
     def main():
         ticker = yf.Ticker(market.upper())
         df = ticker.history()
@@ -291,7 +291,7 @@ def institutional_holders(market:str = typer.Argument(...,help="[italic blue]Ent
     t1.join()
 
 @app.command(help="[bold yellow]Show balance sheet.[/bold yellow]")
-def balance_sheet(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly_balance_sheet")):
+def balance_sheet(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly balance_sheet")):
     def main():
         # Declare and Initialize `ticker` instance 
         ticker = yf.Ticker(market.upper())
@@ -302,6 +302,45 @@ def balance_sheet(market:str = typer.Argument(...,help="[italic blue]Enter requi
         else:
             # Declare and Initialize `df` DataFrame According to the condition
             df = ticker.quarterly_balance_sheet.reset_index() if quater else ticker.balance_sheet.reset_index()
+            # Declare and Initialize `headers` and `rows` Lists
+            headers, rows = df.columns.values.tolist(), []
+            # Declare and Initialize `table` instance
+            table = ColorTable(theme=Themes.OCEAN)
+            # Set table header 
+            table.field_names = headers
+            # Set borders 
+            table.hrules = ALL
+            # Set table rows 
+            for index,row in df.iterrows():
+                table.add_row([row[headers[i]] for i in range(len(row))])
+            # Print table 
+            print(table)
+    def spinner():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Processing...", total=None)
+            time.sleep(5)
+    t1 = threading.Thread(target=main, args=())
+    t2 = threading.Thread(target=spinner, args=())
+    t1.start()
+    t2.start()
+    t1.join()
+
+@app.command(help="[bold yellow]Show cashflow.[/bold yellow]")
+def cashflow(market:str = typer.Argument(...,help="[italic blue]Enter required market[/italic blue]"),quater:bool = typer.Option(default=False,help="get quarterly cashflow")):
+    def main():
+        # Declare and Initialize `ticker` instance 
+        ticker = yf.Ticker(market.upper())
+        hist = ticker.history()
+        if hist.empty:
+            rich.print(f"[yellow][bold]Sorry[/bold] ,unrecognized market:[bold]'{market}'[/bold][/yellow]")
+            typer.Exit()
+        else:
+            # Declare and Initialize `df` DataFrame According to the condition
+            df = ticker.quarterly_cashflow.reset_index() if quater else ticker.cashflow.reset_index()
             # Declare and Initialize `headers` and `rows` Lists
             headers, rows = df.columns.values.tolist(), []
             # Declare and Initialize `table` instance
